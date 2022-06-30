@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <%= csrf_meta_tag() %>
+    <%= live_title_tag assigns[:page_title] || "Adyen", suffix: " · Phoenix Framework" %>
+    <link phx-track-static rel="stylesheet" href={Routes.static_path(@conn, "/assets/app.css")}/>
+
+<link rel="stylesheet"
+     href="https://checkoutshopper-test.adyen.com/checkoutshopper/sdk/5.16.2/adyen.css"
+     integrity="sha384-AKMgvUlvU2aq35fRNFCDp/om1IbCi/MNwLl8Aj/acYzh0MfzTawbKO6MVd97vrJt"
+     crossorigin="anonymous">
+    <script defer phx-track-static type="text/javascript" src={Routes.static_path(@conn, "/assets/app.js")}></script>
+  </head>
+  <body>
+    <%= @inner_content %>
+  </body>
+
+<script src="https://checkoutshopper-test.adyen.com/checkoutshopper/sdk/5.16.2/adyen.js"
+     integrity="sha384-rFGVw00SupBbxK8VKk/wPG/zdoVYXr5vNzGaauMqwBdJv6Ba0pdXMav2blTruUmt"
+     crossorigin="anonymous"></script>
+
+<script>
+
+const configuration = {
+    environment: 'test', // Change to 'live' for the live environment.
+    clientKey: 'test_R4FUD6NTCNA2PA6YELD74LCOKU32UJWY', // Public key used for client-side authentication: https://docs.adyen.com/development-resources/client-side-authentication
+    analytics: {
+      enabled: true // Set to false to not send analytics data to Adyen.
+    },
+    session: {
+      id: '<%= @session_id %>', // Unique identifier for the payment session.
+      sessionData: '<%= @sessionData %>'
+    },
+    onPaymentCompleted: (result, component) => {
+        console.info(result, component);
+    },
+    onError: (error, component) => {
+        console.error(error.name, error.message, error.stack, component);
+    },
+    // Any payment method specific configuration. Find the configuration specific to each payment method:  https://docs.adyen.com/payment-methods
+    // For example, this is 3D Secure configuration for cards:
+    paymentMethodsConfiguration: {
+      card: {
+        hasHolderName: true,
+        holderNameRequired: true,
+        billingAddressRequired: true
+      }
+    }
+  };
+
+  async function main() {
+  
+  // Create an instance of AdyenCheckout using the configuration object.
+   const checkout = await AdyenCheckout(configuration);
+   
+  // Create an instance of Drop-in and mount it to the container you created.
+  //const dropinComponent = checkout.create('dropin').mount('#dropin-container');
+   const dropinComponent = checkout.create('dropin').mount('#dropin-container');
+}
+
+main();
+
+</script>
+</html>
